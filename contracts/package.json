@@ -1,0 +1,21 @@
+{
+  "name": "escrowagent-contracts",
+  "version": "1.0.0",
+  "description": "EscrowAgent smart contracts",
+  "scripts": {
+    "test": "hardhat test",
+    "compile": "hardhat compile",
+    "deploy:testnet": "hardhat run scripts/deploy.js --network botchain",
+    "deploy:mainnet": "hardhat run scripts/deploy.js --network botchainMainnet",
+    "seed:testnet": "hardhat run scripts/seed.js --network botchain"
+  },
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@openzeppelin/contracts": "^5.6.1",
+    "dotenv": "^18.0.6",
+    "hardhat": "^2.29.1"
+  }
+}
