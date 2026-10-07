@@ -1,8 +1,8 @@
 // Written by contracts/scripts/deploy.js. Do not edit by hand.
 export const CHAIN_ID: number = 968;
-export const ESCROW_ADDRESS: `0x${string}` = "0x0000000000000000000000000000000000000000";
+export const ESCROW_ADDRESS: `0x${string}` = "0x12f5e627A044B633C408979743b846961aCA4cA6";
 export const USDT_ADDRESS: `0x${string}` = "0x75edC9335175Fc0552D51D48439F229c10420fe3";
-export const DEPLOY_BLOCK: bigint = 0n;
+export const DEPLOY_BLOCK: bigint = 26076625n;
 
 export const escrowAbi = [
   {

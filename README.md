@@ -6,7 +6,7 @@ Built for the 45-in-90 BOT Chain Challenge.
 Chain: BOT Chain Testnet/Mainnet
 Tech: Next.js, Solidity, Wagmi, Tailwind
 
-**Live app:** _coming soon_ · **Contract:** _coming soon_
+**Live app:** _coming soon_ · **Testnet contract:** [`0x12f5e627A044B633C408979743b846961aCA4cA6`](https://scan.bohr.life/address/0x12f5e627A044B633C408979743b846961aCA4cA6#code)
 
 ---
 

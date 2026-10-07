@@ -1,0 +1,12 @@
+{
+  "botchain": {
+    "chainId": 968,
+    "address": "0x12f5e627A044B633C408979743b846961aCA4cA6",
+    "usdt": "0x75edC9335175Fc0552D51D48439F229c10420fe3",
+    "arbiter": "0xBFc2C94367B3dBf4d2286BD09aca46FBCC8cE5bc",
+    "treasury": "0x658824C842eEcca52618C8B0e7822C894bE127B5",
+    "owner": "0x658824C842eEcca52618C8B0e7822C894bE127B5",
+    "feeBps": 50,
+    "block": 26076625
+  }
+}
