@@ -11,6 +11,21 @@ const DEALS = [
   { amount: "60", terms: "iPhone 11 screen replacement (original part)", stage: "funded" },
 ];
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// The public RPC is load-balanced, so a node can briefly lag one block behind. Retry a send
+// when gas estimation trips over state that simply hasn't reached that node yet.
+async function send(fn, tries = 6) {
+  for (let i = 1; ; i++) {
+    try {
+      return await (await fn()).wait();
+    } catch (e) {
+      if (i >= tries || !/execution reverted/.test(String(e.message))) throw e;
+      await sleep(2500);
+    }
+  }
+}
+
 async function main() {
   const { ethers, network } = hre;
   if (network.config.chainId !== 968) throw new Error("Seed runs on testnet only");
@@ -19,26 +34,29 @@ async function main() {
   const escrow = await ethers.getContractAt("EscrowAgent", address);
   const token = await ethers.getContractAt("@openzeppelin/contracts/token/ERC20/IERC20.sol:IERC20", usdt);
 
-  const total = DEALS.reduce((s, d) => s + ethers.parseUnits(d.amount, 6), 0n);
+  const total = DEALS.slice(Number(process.env.START ?? 0)).reduce((s, d) => s + ethers.parseUnits(d.amount, 6), 0n);
   const bal = await token.balanceOf(buyer.address);
   if (bal < total) throw new Error(`Buyer has ${ethers.formatUnits(bal, 6)} USDT, needs ${ethers.formatUnits(total, 6)}`);
-  await (await token.approve(address, total)).wait();
+  await send(() => token.approve(address, total));
 
   const sellers = [ethers.Wallet.createRandom(), ethers.Wallet.createRandom()].map((w) => w.connect(ethers.provider));
   for (const s of sellers) {
-    await (await buyer.sendTransaction({ to: s.address, value: ethers.parseEther("0.01") })).wait();
+    await send(() => buyer.sendTransaction({ to: s.address, value: ethers.parseEther("0.01") }));
   }
 
   const now = (await ethers.provider.getBlock("latest")).timestamp;
+  const start = Number(process.env.START ?? 0);
   for (const [i, deal] of DEALS.entries()) {
+    if (i < start) continue;
     const seller = sellers[i % sellers.length];
-    const tx = await escrow.createDeal(seller.address, ethers.parseUnits(deal.amount, 6), now + 3 * 86400, deal.terms);
-    const rc = await tx.wait();
+    const rc = await send(() =>
+      escrow.createDeal(seller.address, ethers.parseUnits(deal.amount, 6), now + 3 * 86400, deal.terms)
+    );
     const id = escrow.interface.parseLog(rc.logs.find((l) => l.address.toLowerCase() === address.toLowerCase())).args.id;
     const asSeller = escrow.connect(seller);
-    if (deal.stage !== "funded") await (await asSeller.acceptDeal(id)).wait();
-    if (deal.stage === "delivered" || deal.stage === "released") await (await asSeller.markDelivered(id)).wait();
-    if (deal.stage === "released") await (await escrow.confirmReceipt(id)).wait();
+    if (deal.stage !== "funded") await send(() => asSeller.acceptDeal(id));
+    if (deal.stage === "delivered" || deal.stage === "released") await send(() => asSeller.markDelivered(id));
+    if (deal.stage === "released") await send(() => escrow.confirmReceipt(id));
     console.log(`#${id} ${deal.stage.padEnd(9)} ${deal.amount} USDT  ${deal.terms}`);
   }
 }
