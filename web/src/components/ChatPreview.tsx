@@ -27,7 +27,7 @@ export function ChatPreview() {
             <div className="rounded-xl bg-white p-3">
               <div className="flex items-center gap-2">
                 <LogoMark className="size-5" />
-                <span className="text-xs text-muted">escrowagent.vercel.app</span>
+                <span className="text-xs text-muted">escrow-agent.vercel.app</span>
               </div>
               <p className="mt-2 text-[13px] text-muted">Deal #27</p>
               <p className="num text-[22px] leading-tight font-semibold tracking-[-0.01em]">45.00 USDT locked</p>
