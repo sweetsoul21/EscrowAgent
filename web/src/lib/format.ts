@@ -14,8 +14,9 @@ export function toUnits(value: string): bigint | null {
 
 export function usdt(amount: bigint, opts: { decimals?: number } = {}): string {
   const n = Number(formatUnits(amount, USDT_DECIMALS));
-  const max = opts.decimals ?? (n < 10 ? 2 : n >= 10_000 ? 0 : 2);
-  return n.toLocaleString("en-US", { minimumFractionDigits: Math.min(2, max), maximumFractionDigits: Math.max(2, max) });
+  // Two decimals normally, more only when needed so fees like 0.175 aren't rounded away.
+  const max = opts.decimals ?? (n >= 10_000 ? 0 : 4);
+  return n.toLocaleString("en-US", { minimumFractionDigits: Math.min(2, max), maximumFractionDigits: max });
 }
 
 export function naira(amount: bigint, rate: number | undefined): string | null {
@@ -30,19 +31,23 @@ export function short(address?: string, size = 4): string {
 }
 
 const MINUTE = 60;
-const HOUR = 3600;
 const DAY = 86400;
 
 export function duration(seconds: number): string {
-  const s = Math.max(0, Math.round(seconds));
-  if (s < HOUR) return `${Math.max(1, Math.round(s / MINUTE))} min`;
-  if (s < DAY) {
-    const h = Math.floor(s / HOUR);
-    const m = Math.round((s % HOUR) / MINUTE);
-    return m && h < 6 ? `${h} h ${m} min` : `${h} h`;
+  // Round the total first, then split, so 2 d 23.9 h reads "3 d" and never "2 d 24 h".
+  const minutes = Math.max(1, Math.round(Math.max(0, seconds) / MINUTE));
+  if (minutes < 60) return `${minutes} min`;
+  if (minutes < (DAY / MINUTE) * 0.99) {
+    if (minutes < 6 * 60) {
+      const h = Math.floor(minutes / 60);
+      const m = minutes % 60;
+      return m ? `${h} h ${m} min` : `${h} h`;
+    }
+    return `${Math.round(minutes / 60)} h`;
   }
-  const d = Math.floor(s / DAY);
-  const h = Math.round((s % DAY) / HOUR);
+  const hours = Math.round(minutes / 60);
+  const d = Math.floor(hours / 24);
+  const h = hours % 24;
   return h ? `${d} d ${h} h` : `${d} d`;
 }
 
